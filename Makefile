@@ -1,4 +1,4 @@
-.PHONY: install test lint build clean format type-check
+.PHONY: install test lint build clean format type-check debug run
 
 install:
 	poetry install
@@ -7,12 +7,12 @@ test:
 	poetry run pytest
 
 lint:
-	poetry run flake8 gateway_ops
-	poetry run black gateway_ops --check
-	poetry run pylint gateway_ops
+	poetry run flake8 app
+	poetry run black app --check
+	poetry run pylint app
 
 type-check:
-	poetry run mypy gateway_ops
+	poetry run mypy app
 
 build:
 	poetry build
@@ -25,8 +25,11 @@ clean:
 	find . -type d -name .pytest_cache -exec rm -rf {} +
 
 format:
-	poetry run black gateway_ops
-	poetry run isort gateway_ops
+	poetry run black app
+	poetry run isort app
+
+debug:
+	poetry run uvicorn app.__main__:app --reload
 
 .PHONY: all
 all: install lint type-check test build
