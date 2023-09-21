@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "python_api_development"
+version = "0.1.0"
+description = ""
+authors = ["oswaldohernandez <oswaldohernandez@protonmail.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.103.1"
+uvicorn = "^0.23.2"
+pydantic = "^2.3.0"
+
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.12.0"
+black = "^23.9.1"
+flake8 = "^6.1.0"
+mypy = "^1.5.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
