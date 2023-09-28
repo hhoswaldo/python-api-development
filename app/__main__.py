@@ -1,19 +1,21 @@
+# __main.py
+""" Main application
+"""
+import logging
 from random import randrange
-from typing import Dict, List, Optional
+from typing import Dict, List
 
+import psycopg
 from fastapi import FastAPI, HTTPException, Response, status
-from fastapi.params import Body
-from pydantic import BaseModel
+
+from app import utils
+from app.models import Post
+
+logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI()
-
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-    rating: Optional[int] = None
-
 
 my_posts: List[Dict] = [{"title": "post_1", "content": "bla bla bla", "id": 1}]
 
@@ -32,6 +34,11 @@ def find_index_post(id):
 
 @app.get("/")
 async def root():
+    conn_str = utils.get_conn_str()
+    with psycopg.connect(conn_str) as conn:
+        with conn.cursor() as cur:
+            logger.debug("Database connected")
+
     return {"message": "Hello World"}
 
 
