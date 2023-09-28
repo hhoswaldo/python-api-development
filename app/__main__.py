@@ -2,13 +2,10 @@
 """ Main application
 """
 import logging
-from random import randrange
-from typing import Dict, List
 
-import psycopg
 from fastapi import FastAPI, HTTPException, Response, status
 
-from app import utils
+from app import postgres_driver
 from app.models import Post
 
 logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
@@ -17,77 +14,50 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-my_posts: List[Dict] = [{"title": "post_1", "content": "bla bla bla", "id": 1}]
-
-
-def find_post(post_id):
-    for post in my_posts:
-        if post["id"] == post_id:
-            return post
-
-
-def find_index_post(id):
-    for index, post in enumerate(my_posts):
-        if post["id"] == id:
-            return index
-
 
 @app.get("/")
-async def root():
-    conn_str = utils.get_conn_str()
-    with psycopg.connect(conn_str) as conn:
-        with conn.cursor() as cur:
-            logger.debug("Database connected")
-
+def root():
     return {"message": "Hello World"}
 
 
 @app.get("/posts")
-async def get_posts():
-    return {"data": my_posts}
+def get_posts():
+    return {"data": postgres_driver.get_all_posts()}
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-async def create_posts(post: Post):
-    post_data = post.model_dump()
-    post_data["id"] = randrange(0, 1_000_000)
-    my_posts.append(post_data)
-    return {"data": post_data}
+def create_posts(post: Post):
+    return {"data": postgres_driver.insert_post(post)}
 
 
 @app.get("/posts/{id}")
 def get_post(id: int):
-    post = find_post(id)
-    if not post:
+    post = postgres_driver.get_post(id)
+    if post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} was not found",
         )
-    return {"post_detail": post}
+    return {"data": post}
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(id: int):
-    index = find_index_post(id)
-    if index is None:
+    deleted_post = postgres_driver.delete_post(id)
+    if deleted_post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} does not exist",
         )
-    my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: Post):
-    index = find_index_post(id)
-    print(index)
-    if index is None:
+    updated_post = postgres_driver.update_post(id, post)
+    if updated_post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} does not exist",
         )
-    post_deserialized = post.model_dump()
-    post_deserialized["id"] = id
-    my_posts[index] = post_deserialized
-    return {"data": post_deserialized}
+    return {"data": updated_post}
