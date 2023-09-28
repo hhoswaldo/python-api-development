@@ -1,4 +1,4 @@
-# models.py
+# post.py
 
 from pydantic import BaseModel
 
