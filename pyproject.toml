@@ -12,6 +12,7 @@ fastapi = "^0.103.1"
 uvicorn = "^0.23.2"
 pydantic = "^2.3.0"
 psycopg = {extras = ["binary"], version = "^3.1.12"}
+sqlalchemy = "^2.0.21"
 
 
 [tool.poetry.group.dev.dependencies]
