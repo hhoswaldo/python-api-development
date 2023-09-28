@@ -2,8 +2,12 @@
 
 import os
 
+from passlib.context import CryptContext
 
-def get_postgres_conn_str() -> str:
+PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def get_conn_str() -> str:
     """Get connection string for postgres database.
 
     Raises:
@@ -16,3 +20,7 @@ def get_postgres_conn_str() -> str:
         f"host={os.environ['POSTGRES_HOST']} "
         f"port={os.environ['POSTGRES_PORT']}"
     )
+
+
+def hash(password: str) -> str:
+    return PWD_CONTEXT.hash(password)
