@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
+@router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse
+)
 def create_user(user: schemas.UserCreate):
     user.password = config.hash(user.password)
     new_user = db.users.create_user(user)

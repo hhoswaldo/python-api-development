@@ -16,13 +16,20 @@ class PostBase(BaseModel):
 class PostResponse(PostBase):
     id: int
     created_at: datetime
+    user_id: int
 
     class Config:
         from_attributes = True
 
 
 class PostCreate(PostBase):
-    """Post pydantic model for Create"""
+    """Post CREATE pydantic model"""
+
+    user_id: Optional[int] = None
+
+
+class PostUpdate(PostBase):
+    """Post UPDATE pydantic model"""
 
 
 class UserCreate(BaseModel):
