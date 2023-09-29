@@ -17,7 +17,6 @@ router = APIRouter(prefix="/users", tags=["Users"])
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse
 )
 def create_user(user: schemas.UserCreate):
-    # Hash the password
     user.password = config.hash(user.password)
 
     with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:

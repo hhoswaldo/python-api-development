@@ -24,3 +24,7 @@ def get_conn_str() -> str:
 
 def hash(password: str) -> str:
     return PWD_CONTEXT.hash(password)
+
+
+def verify(plain_password: str, hashed_password):
+    return PWD_CONTEXT.verify(plain_password, hashed_password)
