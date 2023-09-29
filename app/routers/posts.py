@@ -13,7 +13,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=List[schemas.PostResponse])
-def get_posts():
+def get_posts(current_user: int = Depends(oauth2.get_current_user)):
     return db.posts.get_all_posts()
 
 
@@ -25,7 +25,7 @@ def create_posts(post: schemas.PostCreate, current_user: int = Depends(oauth2.ge
 
 
 @router.get("/{post_id}", response_model=schemas.PostResponse)
-def get_post(post_id: int):
+def get_post(post_id: int, current_user: int = Depends(oauth2.get_current_user)):
     post = db.posts.get_post_by_id(post_id)
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with ID {post_id} not found")
@@ -33,7 +33,7 @@ def get_post(post_id: int):
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(post_id: int):
+async def delete_post(post_id: int, current_user: int = Depends(oauth2.get_current_user)):
     deleted_post = db.posts.delete_post_by_id(post_id)
     if deleted_post is None:
         raise HTTPException(
@@ -44,7 +44,7 @@ async def delete_post(post_id: int):
 
 
 @router.put("/{post_id}", response_model=schemas.PostResponse)
-def update_post(post_id: int, post: schemas.PostCreate):
+def update_post(post_id: int, post: schemas.PostCreate, current_user: int = Depends(oauth2.get_current_user)):
     updated_post = db.posts.update_post_by_id(post_id, post)
     if updated_post is None:
         raise HTTPException(

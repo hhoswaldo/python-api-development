@@ -1,9 +1,11 @@
+# auth.py
+"""Auth router"""
+
+
 import logging
 
-import psycopg
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-from psycopg.rows import dict_row
 
 from .. import db
 from ..core import config, oauth2, schemas
