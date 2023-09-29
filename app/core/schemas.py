@@ -13,7 +13,7 @@ class PostBase(BaseModel):
     published: bool = True
 
 
-class Post(PostBase):
+class PostResponse(PostBase):
     id: int
     created_at: datetime
 

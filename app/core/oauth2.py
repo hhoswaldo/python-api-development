@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
+from .. import db
 from . import schemas
 
 logger = logging.getLogger(__name__)
@@ -48,4 +49,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    return verify_access_token(token, credentials_exception=credentials_exception)
+    token = verify_access_token(token, credentials_exception=credentials_exception)
+
+    user = db.users.get_user_by_id(token.id)
+
+    return user

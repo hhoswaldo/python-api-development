@@ -2,75 +2,50 @@
 import logging
 from typing import List
 
-import psycopg
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from psycopg.rows import dict_row
 
-from ..core import config, oauth2, schemas
+from .. import db
+from ..core import oauth2, schemas
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.PostResponse])
 def get_posts():
-    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(""" SELECT * FROM posts """)
-            posts = cursor.fetchall()
-    return posts
+    return db.posts.get_all_posts()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-def create_posts(
-    post: schemas.PostCreate, user_id: int = Depends(oauth2.get_current_user)
-):
-    logger.debug("User id: %d", user_id)
-    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """ INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """,
-                (post.title, post.content, post.published),
-            )
-            new_post = cursor.fetchone()
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
+def create_posts(post: schemas.PostCreate, current_user: int = Depends(oauth2.get_current_user)):
+    logger.debug("Current user: %s", current_user)
+    new_post = db.posts.create_post(post)
     return new_post
 
 
-@router.get("/{post_id}", response_model=schemas.Post)
+@router.get("/{post_id}", response_model=schemas.PostResponse)
 def get_post(post_id: int):
-    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(post_id),))
-            post = cursor.fetchone()
+    post = db.posts.get_post_by_id(post_id)
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with ID {post_id} not found")
     return post
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(post_id: int):
-    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """ DELETE FROM posts WHERE id = %s RETURNING * """, (str(post_id),)
-            )
-            deleted_post = cursor.fetchone()
+    deleted_post = db.posts.delete_post_by_id(post_id)
     if deleted_post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id {post_id} does not exist",
+            detail=f"Post with ID {post_id} does not exist",
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/{post_id}", response_model=schemas.Post)
+@router.put("/{post_id}", response_model=schemas.PostResponse)
 def update_post(post_id: int, post: schemas.PostCreate):
-    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """ UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """,
-                (post.title, post.content, post.published, str(post_id)),
-            )
-            updated_post = cursor.fetchone()
+    updated_post = db.posts.update_post_by_id(post_id, post)
     if updated_post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
