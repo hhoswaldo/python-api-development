@@ -2,6 +2,7 @@
 """ Main application
 """
 import logging
+import logging.config
 
 from fastapi import FastAPI
 

@@ -4,7 +4,7 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 from .. import db
@@ -25,7 +25,7 @@ def login(credentials: OAuth2PasswordRequestForm = Depends()):
             detail="Invalid Credentials",
         )
 
-    if not config.verify(credentials.password, user["password"]):
+    if not config.verify_password(credentials.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials"
         )

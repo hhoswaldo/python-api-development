@@ -18,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse
 )
 def create_user(user: schemas.UserCreate):
-    user.password = config.hash(user.password)
+    user.password = config.hash_password(user.password)
     new_user = db.users.create_user(user)
     return new_user
 

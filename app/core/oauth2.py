@@ -49,8 +49,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    token = verify_access_token(token, credentials_exception=credentials_exception)
+    verified_token = verify_access_token(
+        token, credentials_exception=credentials_exception
+    )
 
-    user = db.users.get_user_by_id(token.id)
+    user = db.users.get_user_by_id(verified_token.id)
 
     return user
