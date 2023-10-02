@@ -1,6 +1,6 @@
 # posts.py
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
@@ -12,9 +12,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", response_model=List[schemas.PostResponse])
-def get_posts(current_user: int = Depends(oauth2.get_current_user)):
-    return db.posts.get_all_posts()
+@router.get(
+    "/",
+    response_model=List[schemas.PostResponse],
+)
+def get_posts(
+    _: Dict = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
+):
+    return db.posts.get_posts_with_limit_offset_search(limit, skip, search)
 
 
 @router.post(
@@ -29,7 +37,7 @@ def create_posts(
 
 
 @router.get("/{post_id}", response_model=schemas.PostResponse)
-def get_post(post_id: int, current_user: int = Depends(oauth2.get_current_user)):
+def get_post(post_id: int, _: Dict = Depends(oauth2.get_current_user)):
     post = db.posts.get_post_by_id(post_id)
     if post is None:
         raise HTTPException(

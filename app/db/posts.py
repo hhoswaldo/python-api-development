@@ -59,3 +59,14 @@ def get_all_posts() -> List[DictRow]:
             cursor.execute(""" SELECT * FROM posts """)
             posts = cursor.fetchall()
     return posts
+
+
+def get_posts_with_limit_offset_search(limit: int, offset: int, search: str):
+    with psycopg.connect(config.get_conn_str(), row_factory=dict_row) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """ SELECT * FROM posts WHERE title LIKE %s OFFSET %s LIMIT %s """,
+                (f"%{search}%", offset, limit),
+            )
+            posts = cursor.fetchall()
+    return posts
