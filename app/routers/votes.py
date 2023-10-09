@@ -13,7 +13,15 @@ router = APIRouter(prefix="/vote", tags=["Vote"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def vote(vote: schemas.Vote, current_user: Dict = Depends(oauth2.get_current_user)):
+def vote_post(
+    vote: schemas.Vote, current_user: Dict = Depends(oauth2.get_current_user)
+):
+    post = db.posts.get_post_by_id(vote.post_id)
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id: {vote.post_id} does not exist",
+        )
     user_id = current_user["id"]
     vote_query = db.votes.get_vote_by_user_id(user_id, vote.post_id)
     logger.debug(vote_query)
