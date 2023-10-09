@@ -1,30 +1,19 @@
-# config.py
-
-import os
-
-from passlib.context import CryptContext
-
-PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# core/config.py
+from pydantic_settings import BaseSettings
 
 
-def get_conn_str() -> str:
-    """Get connection string for postgres database.
+class Settings(BaseSettings):
+    db_hostname: str
+    db_port: str
+    db_password: str
+    db_name: str
+    db_username: str
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
 
-    Raises:
-        KeyError: When any of the required env variables is not found
-    """
-    return (
-        f"dbname={os.environ['POSTGRES_DB']} "
-        f"user={os.environ['POSTGRES_USER']} "
-        f"password={os.environ['POSTGRES_PASSWORD']} "
-        f"host={os.environ['POSTGRES_HOST']} "
-        f"port={os.environ['POSTGRES_PORT']}"
-    )
-
-
-def hash_password(password: str) -> str:
-    return PWD_CONTEXT.hash(password)
+    class Config:
+        env_file = ".env"
 
 
-def verify_password(plain_password: str, hashed_password):
-    return PWD_CONTEXT.verify(plain_password, hashed_password)
+settings = Settings()

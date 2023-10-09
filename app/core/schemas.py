@@ -1,40 +1,18 @@
-# schemas.py
 from datetime import datetime
 from typing import Optional
 
 from pydantic import AwareDatetime, BaseModel, EmailStr
+from pydantic.types import conint
 
 
 class PostBase(BaseModel):
-    """Post base pydantic model"""
-
     title: str
     content: str
     published: bool = True
 
 
-class PostResponse(PostBase):
-    id: int
-    created_at: datetime
-    user_id: int
-
-    class Config:
-        from_attributes = True
-
-
 class PostCreate(PostBase):
-    """Post CREATE pydantic model"""
-
-    user_id: Optional[int] = None
-
-
-class PostUpdate(PostBase):
-    """Post UPDATE pydantic model"""
-
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
+    pass
 
 
 class UserResponse(BaseModel):
@@ -44,6 +22,29 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class Post(PostBase):
+    id: int
+    created_at: AwareDatetime
+    owner_id: int
+    owner: UserResponse
+
+    class Config:
+        from_attributes = True
+
+
+class PostResponse(BaseModel):
+    Post: Post
+    votes: int
+
+    class Config:
+        from_attributes = True
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
 
 
 class UserLogin(BaseModel):
@@ -62,4 +63,4 @@ class TokenData(BaseModel):
 
 class Vote(BaseModel):
     post_id: int
-    direction: bool = True
+    dir: conint(le=1)
