@@ -1,1 +1,1 @@
-from . import posts, users
+from . import posts, users, votes
