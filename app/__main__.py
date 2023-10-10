@@ -7,7 +7,6 @@ import logging.config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .core import config, database, models
 from .routers import auth, posts, users, votes
 
 logging.config.fileConfig("logging.conf", disable_existing_loggers=False)
