@@ -1,6 +1,7 @@
 # __main.py
 """ Main application
 """
+
 import logging
 import logging.config
 
